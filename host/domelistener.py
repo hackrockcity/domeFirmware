@@ -1,5 +1,7 @@
 import socket
 import time
+import Queue
+import threading
 import LedStrips
 
 # UDP settings
@@ -18,14 +20,31 @@ strip_names = [
 	['/dev/tty.usbmodem64',    16],
 ]
 
-strips = []
+
+
+class threadedLedStrips(threading.Thread):
+	q = Queue.Queue()
+
+	def __init__(self, port_name, offset):
+		threading.Thread.__init__(self)
+		self.strip = LedStrips.LedStrips(offset)
+		self.strip.connect(port_name)
+
+	def run(self):
+		while True:
+			command = self.q.get()
+			self.strip.draw(data,image_width)
+			self.q.task_done()
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((host,port))
 
+strips = []
+
 for strip_name in strip_names:
-	strip = LedStrips.LedStrips(strip_name[1])
-	strip.connect(strip_name[0])
+	strip = threadedLedStrips(strip_name[0], strip_name[1])
+	strip.start()
 	strips.append(strip)
 
 start_time = time.time()
@@ -47,7 +66,7 @@ while 1:
 		continue
 
 	for strip in strips:
-		strip.draw(data[1:], image_width)
+		strip.q.put(data[1:])	
 
 	frame_count = (frame_count + 1) % 30
 	if (frame_count == 0):
