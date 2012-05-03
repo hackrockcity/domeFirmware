@@ -6,6 +6,13 @@ import optparse
 import random
 
 class LedStrips:
+	def __init__(self, offset):
+		"""
+		Initialize an med strip
+		@param offset X position of the image to get LED image data from
+		"""
+		self.offset = offset
+
 	def connect(self, port):
 		self.ser = serial.Serial(port, 1000002, timeout=0)
 
@@ -47,21 +54,19 @@ class LedStrips:
 
 		return output
 
-	def draw(self, data, width, offset):
+	def draw(self, data, width):
 		"""
 		Draw a portion of an image frame to LED strips.
 		@param data Image data, as a 1D, 8bit RGB array.
 		@param width Width of the image, in pixels
-		@param offset X position of the image to draw to the LEDs
 		"""
 
 		s = ''
 		
 		# for each 'row' in the data, assemble a byte stream for it.
 		for row in range(0,len(data)/3/width):
-			start_index = (width*row + offset)*3
+			start_index = (width*row + self.offset)*3
 			s += self.RgbRowToStrips(data[start_index:start_index+24])
-		print len(s)
 
 		for x in range(0, len(s)/64):
 			t = s[64 * x : (64 * x) + 64]
@@ -69,7 +74,7 @@ class LedStrips:
 			self.ser.write(t)
 
 		# TODO: Why 80?
-		for i in range(0,80):
+		for i in range(0,64):
 			self.ser.write('\x00')
 
 if __name__ == "__main__":
@@ -79,7 +84,7 @@ if __name__ == "__main__":
 
 	(options, args) = parser.parse_args()
 
-	strip = LedStrips()
+	strip = LedStrips(0)
         strip.connect(options.serial_port)
 
         strip_length = 160 # length, in pixels
@@ -93,19 +98,12 @@ if __name__ == "__main__":
 			for col in range (0,image_width):
 				if j == 0:
 					data += chr(0xFF) # B
-					data += chr(0) # B
-					data += chr(0xFF) # B
-				if j == 1:
-					data += chr(0) # B
 					data += chr(0xFF) # B
 					data += chr(0xFF) # B
-				if j == 2:
-					data += chr(0) # B
-					data += chr(0) # B
-					data += chr(0xFF) # B
-				j = (j + 1) % 3
+				else:
+					data += chr(i) # B
+					data += chr(i) # B
+					data += chr(i) # B
+		j = (j+1)%2
 
-		i = (i + 5)%256
-
-	        strip.draw(data, image_width, 0)
-		time.sleep(1)
+	        strip.draw(data, image_width)
