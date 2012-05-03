@@ -44,13 +44,12 @@ void send_parallel_byte(
 	const uint8_t c
 )
 {
-	PORTC &= ~(1 << 7);
+	PORTD = 0x00;
 
 	PORTB = c;
 
-	PORTC |= 1 << 7;
+	PORTD = 0xFF;
 }
-
 
 static void
 send_color(
@@ -70,50 +69,13 @@ send_color(
 	}
 }
 
-
-
 int main(void)
 {
 	CPU_PRESCALE(0);
 	usb_init();
 
 	DDRB = 0xFF;
-	DDRC = 1 << 7;
-
-#if 0
-	uint8_t r = 0x01;
-	uint8_t g = 0x30;
-	uint8_t b = 0x01;
-
-	while (1)
-	{
-		uint16_t i;
-		r = (r + 1) & 0x3F;
-
-		for (i = 0 ; i < (32 * 5) ; i++)
-		{
-			send_color(g);
-			send_color(r);
-			send_color(b);
-		}
-
-		for (i = 0 ; i < 64 ; i++)
-		{
-			send_parallel_byte(0x00);
-		}
-
-		for (i = 0 ; i < 65530 ; i++)
-		{
-			asm("nop");
-			asm("nop");
-			asm("nop");
-			asm("nop");
-			asm("nop");
-			asm("nop");
-		}
-	}
-#endif
-	
+	DDRD = 0xFF;	
 
 	while (1)
 	{
@@ -140,57 +102,6 @@ int main(void)
 		SREG = irq_flags;
 	}
 }
-
-#else
-
-// Basic command interpreter for controlling port pins
-int main(void)
-{
-	char buf[32];
-	uint8_t n;
-
-	// set for 16 MHz clock, and turn on the LED
-	CPU_PRESCALE(0);
-	LED_CONFIG;
-	LED_ON;
-
-	// initialize the USB, and then wait for the host
-	// to set configuration.  If the Teensy is powered
-	// without a PC connected to the USB port, this 
-	// will wait forever.
-	usb_init();
-	while (!usb_configured()) /* wait */ ;
-	_delay_ms(1000);
-
-	while (1) {
-		// wait for the user to run their terminal emulator program
-		// which sets DTR to indicate it is ready to receive.
-		while (!(usb_serial_get_control() & USB_SERIAL_DTR)) /* wait */ ;
-
-		// discard anything that was received prior.  Sometimes the
-		// operating system or other software will send a modem
-		// "AT command", which can still be buffered.
-		usb_serial_flush_input();
-
-		// print a nice welcome message
-		send_str(PSTR("\r\nTeensy USB Serial Example, "
-			"Simple Pin Control Shell\r\n\r\n"
-			"Example Commands\r\n"
-			"  B0?   Read Port B, pin 0\r\n"
-			"  C2=0  Write Port C, pin 1 LOW\r\n"
-			"  D6=1  Write Port D, pin 6 HIGH  (D6 is LED pin)\r\n\r\n"));
-
-		// and then listen for commands and process them
-		while (1) {
-			send_str(PSTR("> "));
-			n = recv_str(buf, sizeof(buf));
-			if (n == 255) break;
-			send_str(PSTR("\r\n"));
-			parse_and_execute_command(buf, n);
-		}
-	}
-}
-#endif
 
 // Send a string to the USB serial port.  The string must be in
 // flash memory, using PSTR
