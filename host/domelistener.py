@@ -16,8 +16,8 @@ image_width = 25
 # Serial port settings
 strip_names = [
 	['/dev/tty.usbmodem12341', 0],
-	['/dev/tty.usbmodem63',    8],
-	['/dev/tty.usbmodem64',    16],
+#	['/dev/tty.usbmodem63',    8],
+#	['/dev/tty.usbmodem64',    16],
 ]
 
 

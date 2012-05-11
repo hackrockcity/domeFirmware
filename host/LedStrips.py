@@ -28,6 +28,15 @@ class LedStrips:
 			raise Exception('Expected 24 bytes of data, got %i'%(len(data)))
 
 		output = ''
+
+		# Blue byte
+		output += '\xFF'
+		for bit_index in range(7, 0, -1):
+			c = 0x00
+			for pixel_index in range(0, 8):
+				c |= (ord(data[2+3*pixel_index]) >> bit_index & 1) << pixel_index
+			output += chr(c)
+
 		# Green byte
 		output += '\xFF'
 		for bit_index in range(7, 0, -1):
@@ -44,13 +53,6 @@ class LedStrips:
 				c |= (ord(data[3*pixel_index]) >> bit_index & 1) << pixel_index
 			output += chr(c)
 
-		# Blue byte
-		output += '\xFF'
-		for bit_index in range(7, 0, -1):
-			c = 0x00
-			for pixel_index in range(0, 8):
-				c |= (ord(data[2+3*pixel_index]) >> bit_index & 1) << pixel_index
-			output += chr(c)
 
 		return output
 
@@ -68,42 +70,57 @@ class LedStrips:
 			start_index = (width*row + self.offset)*3
 			s += self.RgbRowToStrips(data[start_index:start_index+24])
 
-		for x in range(0, len(s)/64):
+		for x in range(0, len(s)/64): # TODO: What this means?
 			t = s[64 * x : (64 * x) + 64]
 
 			self.ser.write(t)
 
-		# TODO: Why 80?
-		for i in range(0,64):
+		# TODO: Why does 20 work? it make a'no sense.
+                # 1 does not work with the listener.
+		for i in range(0,20):
 			self.ser.write('\x00')
 
 if __name__ == "__main__":
 	parser = optparse.OptionParser()
 	parser.add_option("-p", "--serialport", dest="serial_port",
 		help="serial port (ex: /dev/ttyUSB0)", default="/dev/tty.usbmodel12341")
+	parser.add_option("-l", "--length", dest="strip_length",
+		help="length of the strip", default=160, type=int)
 
 	(options, args) = parser.parse_args()
 
 	strip = LedStrips(0)
         strip.connect(options.serial_port)
 
-        strip_length = 160 # length, in pixels
         image_width = 8 # width of the picture index
 
 	i = 0
 	j = 0
 	while True:
 		data = ''
-		for row in range (0,strip_length):
-			for col in range (0,image_width):
+		for row in range (0, options.strip_length):
+			for col in range (0, image_width):
 				if j == 0:
-					data += chr(0xFF) # B
-					data += chr(0xFF) # B
-					data += chr(0xFF) # B
+					data += chr(0x0) # B
+					data += chr(0x0) # B
+					data += chr(0x0) # B
 				else:
-					data += chr(i) # B
-					data += chr(i) # B
-					data += chr(i) # B
-		j = (j+1)%2
+					if ((row+j)%3 == 0):
+						data += chr(j) # B
+						data += chr(0) # B
+						data += chr(0) # B
+					if ((row+j)%3 == 1):
+						data += chr(0) # B
+						data += chr(j) # B
+						data += chr(0) # B
+					if ((row+j)%3 == 2):
+						data += chr(0) # B
+						data += chr(0) # B
+						data += chr(j) # B
+
+		i = (i+1)%20
+                if i == 0:
+			j = (j+1)%255
+
 
 	        strip.draw(data, image_width)
