@@ -16,14 +16,14 @@ image_width = 25
 # Serial port settings
 strip_names = [
 	['/dev/tty.usbmodem12341', 0],
-#	['/dev/tty.usbmodem63',    8],
-#	['/dev/tty.usbmodem64',    16],
+	['/dev/tty.usbmodem107',   8],
+	['/dev/tty.usbmodem108',    16],
 ]
 
 
 
 class threadedLedStrips(threading.Thread):
-	q = Queue.Queue()
+	q = Queue.Queue(1)
 
 	def __init__(self, port_name, offset):
 		threading.Thread.__init__(self)
@@ -66,7 +66,10 @@ while 1:
 		continue
 
 	for strip in strips:
-		strip.q.put(data[1:])	
+		if strip.q.full():
+			print "dropped a frame!"
+		else:
+			strip.q.put(data[1:])
 
 	frame_count = (frame_count + 1) % 30
 	if (frame_count == 0):
