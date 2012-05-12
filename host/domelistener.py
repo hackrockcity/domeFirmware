@@ -33,7 +33,7 @@ class threadedLedStrips(threading.Thread):
 	def run(self):
 		while True:
 			command = self.q.get()
-			self.strip.draw(data,image_width)
+			self.strip.draw(command,image_width)
 			self.q.task_done()
 
 

@@ -29,13 +29,6 @@ class LedStrips:
 
 		output = ''
 
-		# Blue byte
-		output += '\xFF'
-		for bit_index in range(7, 0, -1):
-			c = 0x00
-			for pixel_index in range(0, 8):
-				c |= (ord(data[2+3*pixel_index]) >> bit_index & 1) << pixel_index
-			output += chr(c)
 
 		# Green byte
 		output += '\xFF'
@@ -51,6 +44,14 @@ class LedStrips:
 			c = 0x00
 			for pixel_index in range(0, 8):
 				c |= (ord(data[3*pixel_index]) >> bit_index & 1) << pixel_index
+			output += chr(c)
+
+		# Blue byte
+		output += '\xFF'
+		for bit_index in range(7, 0, -1):
+			c = 0x00
+			for pixel_index in range(0, 8):
+				c |= (ord(data[2+3*pixel_index]) >> bit_index & 1) << pixel_index
 			output += chr(c)
 
 
@@ -100,23 +101,21 @@ if __name__ == "__main__":
 		data = ''
 		for row in range (0, options.strip_length):
 			for col in range (0, image_width):
-				if j == 0:
-					data += chr(0x0) # B
-					data += chr(0x0) # B
-					data += chr(0x0) # B
-				else:
-					if ((row+j)%3 == 0):
-						data += chr(j) # B
-						data += chr(0) # B
-						data += chr(0) # B
-					if ((row+j)%3 == 1):
-						data += chr(0) # B
-						data += chr(j) # B
-						data += chr(0) # B
-					if ((row+j)%3 == 2):
-						data += chr(0) # B
-						data += chr(0) # B
-						data += chr(j) # B
+				if ((row+j)%3 == 0):
+					data += chr(0xFF) # B
+					data += chr(0) # B
+					data += chr(0) # B
+				if ((row+j)%3 == 1):
+					data += chr(0) # B
+					data += chr(0xFF) # B
+					data += chr(0) # B
+				if ((row+j)%3 == 2):
+					data += chr(0) # B
+					data += chr(0) # B
+					data += chr(0xFF) # B
+#				data += chr(0xFF) # B
+#				data += chr(0xFF) # B
+#				data += chr(0xFF) # B
 
 		i = (i+1)%20
                 if i == 0:
