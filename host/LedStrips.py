@@ -1,6 +1,7 @@
 import serial
 import time
 import optparse
+import array
 
 class LedStrips:
 
@@ -32,13 +33,14 @@ class LedStrips:
 
 		output = ''
 
+		data = array.array('B', data)
 
 		# Green byte
 		output += '\xFF'
 		for bit_index in range(7, 0, -1):
 			c = 0x00
 			for pixel_index in range(0, 8):
-				c |= (ord(data[1+3*pixel_index]) >> bit_index & 1) << pixel_index
+				c += (data[1+3*pixel_index] >> bit_index & 1) << pixel_index
 			output += chr(c)
 
 		# Red byte
@@ -46,7 +48,7 @@ class LedStrips:
 		for bit_index in range(7, 0, -1):
 			c = 0x00
 			for pixel_index in range(0, 8):
-				c |= (ord(data[3*pixel_index]) >> bit_index & 1) << pixel_index
+				c |= (data[3*pixel_index] >> bit_index & 1) << pixel_index
 			output += chr(c)
 
 		# Blue byte
@@ -54,7 +56,7 @@ class LedStrips:
 		for bit_index in range(7, 0, -1):
 			c = 0x00
 			for pixel_index in range(0, 8):
-				c |= (ord(data[2+3*pixel_index]) >> bit_index & 1) << pixel_index
+				c |= (data[2+3*pixel_index] >> bit_index & 1) << pixel_index
 			output += chr(c)
 
 
