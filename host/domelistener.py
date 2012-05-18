@@ -1,7 +1,7 @@
 import socket
 import time
 import Queue
-import threading
+import multiprocessing
 import LedStrips
 
 # UDP settings
@@ -16,17 +16,19 @@ image_width = 25
 # Serial port settings
 strip_names = [
 	['/dev/tty.usbmodem12341', 0],
-	['/dev/tty.usbmodem107',   8],
-	['/dev/tty.usbmodem108',    16],
+	['/dev/tty.usbmodem121',   8],
 ]
 
 
 
-class threadedLedStrips(threading.Thread):
-	q = Queue.Queue(1)
+class threadedLedStrips(multiprocessing.Process):
+	q = multiprocessing.Queue(2)
 
 	def __init__(self, port_name, offset):
-		threading.Thread.__init__(self)
+		self.port_name = port_name
+		self.offset = offset
+
+		multiprocessing.Process.__init__(self, target=self.run)
 		self.strip = LedStrips.LedStrips(offset)
 		self.strip.connect(port_name)
 
@@ -34,7 +36,6 @@ class threadedLedStrips(threading.Thread):
 		while True:
 			command = self.q.get()
 			self.strip.draw(command,image_width)
-			self.q.task_done()
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
