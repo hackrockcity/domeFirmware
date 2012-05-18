@@ -6,11 +6,12 @@ import optparse
 import random
 
 class LedStrips:
-	def __init__(self, offset):
+	def __init__(self, image_width, offset):
 		"""
 		Initialize an med strip
 		@param offset X position of the image to get LED image data from
 		"""
+		self.image_width = image_width
 		self.offset = offset
 
 	def connect(self, port):
@@ -57,18 +58,25 @@ class LedStrips:
 
 		return output
 
-	def draw(self, data, width):
+	def draw(self, data):
 		"""
 		Draw a portion of an image frame to LED strips.
 		@param data Image data, as a 1D, 8bit RGB array.
-		@param width Width of the image, in pixels
+		"""
+		self.load_data(data)
+		self.flip()
+
+	def load_data(self, data):
+		"""
+		Load the next frame into the strips, but don't actually clock it out.
+		@param data Image data, as a 1D, 8bit RGB array.
 		"""
 
 		s = ''
-		
+
 		# for each 'row' in the data, assemble a byte stream for it.
-		for row in range(0,len(data)/3/width):
-			start_index = (width*row + self.offset)*3
+		for row in range(0,len(data)/3/self.image_width):
+			start_index = (self.image_width*row + self.offset)*3
 			s += self.RgbRowToStrips(data[start_index:start_index+24])
 
 		for x in range(0, len(s)/64): # TODO: What this means?
@@ -76,9 +84,10 @@ class LedStrips:
 
 			self.ser.write(t)
 
+	def flip(self):
 		# TODO: Why does 20 work? it make a'no sense.
                 # 1 does not work with the listener.
-		for i in range(0,20):
+		for i in range(0,64):
 			self.ser.write('\x00')
 
 if __name__ == "__main__":
@@ -90,10 +99,10 @@ if __name__ == "__main__":
 
 	(options, args) = parser.parse_args()
 
-	strip = LedStrips(0)
-        strip.connect(options.serial_port)
+        image_width = 8 # width of the picture
 
-        image_width = 8 # width of the picture index
+	strip = LedStrips(image_width, 0)
+        strip.connect(options.serial_port)
 
 	i = 0
 	j = 0
@@ -122,4 +131,4 @@ if __name__ == "__main__":
 			j = (j+1)%255
 
 
-	        strip.draw(data, image_width)
+	        strip.draw(data)
