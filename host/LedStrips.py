@@ -36,7 +36,7 @@ class LedStrips:
 		# Green byte
 		output += '\xFF'
 		for bit_index in range(7, 0, -1):
-			c = '\x00'
+			c = 0x00
 			for pixel_index in range(0, 8):
 				c |= (ord(data[1+3*pixel_index]) >> bit_index & 1) << pixel_index
 			output += chr(c)
