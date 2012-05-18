@@ -71,6 +71,7 @@ start_time = time.time()
 frame_count = 0
 while 1:
 	data, addr = sock.recvfrom(buffer_size)
+        update_start_time = time.time()
 	
 	if not data:
 		print "no data."
@@ -86,20 +87,33 @@ while 1:
 		continue
 
 #	print "Send draw"
+	send_draw_start_time = time.time()
 	# Clock out the previous frame
 	new_data_event.clear()
 	draw_event.set()
+	send_draw_time = time.time() - send_draw_start_time
 
 	# Load in the next frame
-	for pos in range(0, image_width*image_height*3):
-		image_data[pos] = data[pos+1]
+	load_frame_start_time = time.time()
+	image_data[:] = data[1:]
+#	for pos in range(0, image_width*image_height*3):
+#		image_data[pos] = data[pos+1]
+	load_frame_time = time.time() - load_frame_start_time
 
 #	print "Send data--"
+	send_data_start_time = time.time()
 	draw_event.clear()
 	new_data_event.set()
+	send_data_time = time.time() - send_data_start_time
 
 	frame_count = (frame_count + 1) % 30
 	if (frame_count == 0):
 		print "Frame rate: %3.1f"%(30/(time.time() - start_time))
 		start_time = time.time()
+#	print 'update_time=%4.4f, send_draw=%4.4f, load_frame=%4.4f, send_data=%4.4f'%(
+#		time.time() - update_start_time,
+#		send_draw_time,
+#		load_frame_time,
+#		send_data_time
+#		)
 

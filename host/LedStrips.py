@@ -1,11 +1,13 @@
 import serial
 import time
-import struct
-import binascii
 import optparse
-import random
 
 class LedStrips:
+
+	frame_count = 0
+	format_time_total = 0
+
+
 	def __init__(self, image_width, offset):
 		"""
 		Initialize an med strip
@@ -34,7 +36,7 @@ class LedStrips:
 		# Green byte
 		output += '\xFF'
 		for bit_index in range(7, 0, -1):
-			c = 0x00
+			c = '\x00'
 			for pixel_index in range(0, 8):
 				c |= (ord(data[1+3*pixel_index]) >> bit_index & 1) << pixel_index
 			output += chr(c)
@@ -74,15 +76,29 @@ class LedStrips:
 
 		s = ''
 
+		format_time = 0
 		# for each 'row' in the data, assemble a byte stream for it.
 		for row in range(0,len(data)/3/self.image_width):
 			start_index = (self.image_width*row + self.offset)*3
+			format_start_time = time.time()
 			s += self.RgbRowToStrips(data[start_index:start_index+24])
+			format_time += time.time() - format_start_time
 
-		for x in range(0, len(s)/64): # TODO: What this means?
+		# Send the data out in 64-byte chunks
+		output_start_time = time.time()
+		for x in range(0, len(s)/64):
 			t = s[64 * x : (64 * x) + 64]
-
 			self.ser.write(t)
+		output_time = time.time() - output_start_time
+
+		self.format_time_total += format_time
+		self.frame_count += 1
+
+		if self.frame_count > 30:
+			average_time = self.format_time_total/self.frame_count
+			self.frame_count = 0
+			self.format_time_total = 0
+			print average_time
 
 	def flip(self):
 		# TODO: Why does 20 work? it make a'no sense.
