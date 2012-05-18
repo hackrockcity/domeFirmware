@@ -1,10 +1,10 @@
-import host
 import binascii
 import unittest
+import LedStrips
 
 class LedStripsTest(unittest.TestCase):
 	def setUp(self):
-		self.r = host.LedStrips()
+		self.r = LedStrips.LedStrips(8,0)
 
 	def test_RgbRowToStrips_too_little_data(self):
 		self.assertRaises(Exception, self.r.RgbRowToStrips, '1234567890123')
