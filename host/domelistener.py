@@ -11,15 +11,14 @@ buffer_size = 200000
 
 # Image settings
 image_height = 160
-image_width = 25
+image_width = 24
 
 # Serial port settings
 strip_names = [
 	['/dev/tty.usbmodem12341', 0],
-	['/dev/tty.usbmodem121',   8],
-	['/dev/tty.usbmodem122',   16],
+	['/dev/tty.usbmodem11',   16],
+	['/dev/tty.usbmodem12',   8],
 ]
-
 
 class threadedLedStrips(multiprocessing.Process):
 
