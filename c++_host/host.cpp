@@ -1,6 +1,8 @@
 
 #include <iostream>
-#include <String>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
 
 // First, try to send data to the usb port
 #include <fcntl.h>   /* File control definitions */
@@ -83,7 +85,7 @@ void LedStrip::SendBytes64(char* data) {
     }
     while (return_code < 0);
     if (count > 0) {
-        std::cout << "index=" << index << ", count=" << count << std::endl;
+        std::cout << "count=" << count << std::endl;
     }
 
 }
@@ -114,7 +116,8 @@ void LedStrip::Flip() {
 int main( int argc, const char* argv[] ) {
     std::cout << "Connecting!" << std::endl;
     LedStrip test(24,160,0);
-    test.Connect("/dev/cu.usbmodem12341");
+//    test.Connect("/dev/cu.usbmodem12341");
+    test.Connect("/dev/ttyACM0");
 
     // Black test frame
     char data_off[24*160*3];
