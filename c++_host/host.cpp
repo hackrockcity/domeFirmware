@@ -37,6 +37,11 @@ class LedStrip {
     void Flip();
 
   private:
+    /**
+     * Send 64 bytes of data to the machine
+     **/
+    void SendBytes64(char* data);
+
     int m_image_width;
     int m_image_height;
     int m_offset;
@@ -54,17 +59,36 @@ void LedStrip::Connect(std::string portname)
     exit(1);  // TODO: Should we actually exit here?
   }
 
-//  fcntl(m_fd, F_SETFL, 0);
-//
-//  struct termios options;
-//  tcgetattr(m_fd, &options);
-//  cfsetispeed(&options, B230400);
-//  cfsetospeed(&options, B230400);
-//  tcsetattr(m_fd, TCSANOW, &options);
+  struct termios options;
+  tcgetattr(m_fd, &options);
+  cfsetispeed(&options, B115200);
+  cfsetospeed(&options, B115200);
+  tcsetattr(m_fd, TCSANOW, &options);
+}
+
+void LedStrip::SendBytes64(char* data) {
+    int return_code;
+    int count = 0;
+
+    do {
+        return_code = write(m_fd, data, 64);
+        if (return_code < 0) {
+            tcdrain(m_fd);
+            count++;
+//            std::cerr << "LedStrip::LoadData: Failure to write to serial port"
+//                      << " error=" << strerror(errno)
+//                      << " index=" << index
+//                      << std::endl;
+        }
+    }
+    while (return_code < 0);
+    if (count > 0) {
+        std::cout << "index=" << index << ", count=" << count << std::endl;
+    }
+
 }
 
 void LedStrip::LoadData(char* data) {
-    int return_code;
 
     char test[64];
     for (int index = 0; index < 64; index++) {
@@ -73,31 +97,31 @@ void LedStrip::LoadData(char* data) {
 
     // Write out the appropriate amount of data
     for (int index = 0; index < m_image_height*8*3; index+=64) {
-        return_code = write(m_fd, test, 64);
+        SendBytes64(test);
     }
 }
 
 void LedStrip::Flip() {
-    int return_code;
-
     char test[64];
     for (int index = 0; index < 64; index++) {
         test[index] = 0x00;
     }
 
     // Write out the appropriate amount of data
-    return_code = write(m_fd, test, 64);
+    SendBytes64(test);
 }
 
 int main( int argc, const char* argv[] ) {
     std::cout << "Connecting!" << std::endl;
     LedStrip test(24,160,0);
-    test.Connect("/dev/tty.usbmodem12341");
+    test.Connect("/dev/cu.usbmodem12341");
 
-    std::cout << "Loading!" << std::endl;
-    char data[1];
-    test.LoadData(data);
-
-    std::cout << "Flipping!" << std::endl;
-    test.Flip();
+    while(1) {
+        std::cout << "Loading!" << std::endl;
+        char data[1];
+        test.LoadData(data);
+ 
+        std::cout << "Flipping!" << std::endl;
+        test.Flip();
+    }
 }
