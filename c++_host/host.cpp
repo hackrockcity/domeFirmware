@@ -97,7 +97,7 @@ void LedStrip::LoadData(char* data) {
 
     // Write out the appropriate amount of data
     for (int index = 0; index < m_image_height*8*3; index+=64) {
-        SendBytes64(test);
+        SendBytes64(data);
     }
 }
 
@@ -116,10 +116,34 @@ int main( int argc, const char* argv[] ) {
     LedStrip test(24,160,0);
     test.Connect("/dev/cu.usbmodem12341");
 
+    // Black test frame
+    char data_off[24*160*3];
+
+    for (int i = 0; i < 24*160*3; i+=1) {
+        data_off[i] = 0x00;
+    }
+
+    for (int i = 0; i < 24*160*3; i+=8) {
+        data_off[i] = 0xFF;
+    }
+
+    // White test frame
+    char data_on[24*160*3];
+
+    for (int i = 0; i < 24*160*3; i+=1) {
+        data_on[i] = 0xFF;
+    }
+
+    int count = 0;
     while(1) {
         std::cout << "Loading!" << std::endl;
-        char data[1];
-        test.LoadData(data);
+        if (count < 1) {
+            test.LoadData(data_on);
+        }
+        else {
+            test.LoadData(data_off);
+        }
+        count = (count+1)%2;
  
         std::cout << "Flipping!" << std::endl;
         test.Flip();
