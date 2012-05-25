@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "LedStrip.h"
 #include "SocketListener.h"
@@ -10,54 +11,28 @@ int main( int argc, const char* argv[] ) {
     int display_width  = 24;
 
     // Connect to a LED strip
-    LedStrip test(display_width,display_height,0);
-    test.Connect("/dev/cu.usbmodem12341");
-//    test.Connect("/dev/ttyACM0");
+    std::vector<LedStrip> strips;
+
+    strips.push_back(LedStrip(display_width,display_height,0));
+    strips.push_back(LedStrip(display_width,display_height,0));
+//    strips.push_back(LedStrip(display_width,display_height,0));
+//    strips[0].Connect("/dev/ttyACM0");
+//    strips[1].Connect("/dev/ttyACM1");
+//    strips[0].Connect("/dev/ttyACM2");
+    strips[0].Connect("/dev/cu.usbmodem12341");
 
     SocketListener listener;
     listener.Connect("0.0.0.0", 58082);
-    // 
-
-
-
-    // Black test frame
-    char data_off[display_width*display_height*3];
-
-    for (int i = 0; i < display_width*display_height*3; i+=1) {
-        data_off[i] = 0x00;
-    }
-
-    for (int i = 0; i < display_width*display_height*3; i+=8) {
-        data_off[i] = 0xFF;
-    }
-
-    // White test frame
-    char data_on[display_width*display_height*3];
-
-    for (int i = 0; i < display_width*display_height*3; i+=1) {
-        data_on[i] = 0xFF;
-    }
 
     while(1) {
-        char data[display_width*display_height*3+1];
+       char data[display_width*display_height*3+1];
         listener.GetFrame(data, display_width*display_height*3+1);
+        for(int i = 0; i < strips.size(); i++) {
+            strips[i].Flip();
+        }
 
-        test.LoadData(data);
-        test.Flip();
-    }
-/*
-    // Just flash.
-    int count = 0;
-    while(1) {
-        if (count < 1) {
-            test.LoadData(data_on);
+        for(int i = 0; i < strips.size(); i++) {
+            strips[i].LoadData(data);
         }
-        else {
-            test.LoadData(data_off);
-        }
-        count = (count+1)%2;
- 
-        test.Flip();
     }
-*/
 }

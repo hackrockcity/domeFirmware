@@ -1,4 +1,8 @@
 #include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
 #include <fcntl.h>   /* File control definitions */
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
@@ -71,14 +75,17 @@ void LedStrip::ConvertColor24(char* data) {
 }
 
 void LedStrip::LoadData(char* data) {
+    char output_data[m_image_height*m_image_width*3];
+    memcpy(output_data, data, m_image_height*m_image_width*3);
+
     // Convert the data to the appropriate space
     for (int index = 1; index < m_image_height*8*3; index+=24) {
-        ConvertColor24(data+index);
+        ConvertColor24(output_data+index);
     }
 
     // Write out the appropriate amount of data
     for (int index = 1; index < m_image_height*8*3; index+=64) {
-        SendBytes64(data+index);
+        SendBytes64(output_data+index);
     }
 }
 
