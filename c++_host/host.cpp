@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <pthread.h>
 
 #include "LedStrip.h"
 #include "SocketListener.h"
@@ -14,7 +15,7 @@ int main( int argc, const char* argv[] ) {
     std::vector<LedStrip> strips;
 
     strips.push_back(LedStrip(display_width,display_height,0));
-    strips.push_back(LedStrip(display_width,display_height,0));
+//    strips.push_back(LedStrip(display_width,display_height,0));
 //    strips.push_back(LedStrip(display_width,display_height,0));
 //    strips[0].Connect("/dev/ttyACM0");
 //    strips[1].Connect("/dev/ttyACM1");
