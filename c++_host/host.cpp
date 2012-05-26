@@ -32,7 +32,7 @@ int main( int argc, const char* argv[] ) {
         }
 
         for(int i = 0; i < strips.size(); i++) {
-            strips[i].LoadData(data);
+            strips[i].LoadData(data + 1);
         }
     }
 }

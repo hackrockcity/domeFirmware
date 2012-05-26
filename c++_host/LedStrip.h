@@ -44,8 +44,10 @@ class LedStrip {
 
     /**
      * Convert a block of colors from split RGB format to parallal format
+     * @param[out] output_data 24 bytes of formatted color data.
+     * @param[in] input_data 24 bytes of input color data
      */
-    void ConvertColor24(char* data);
+    void ConvertColor24(char* output_data, char* input_data);
 
     int m_image_width;
     int m_image_height;

@@ -47,44 +47,36 @@ void LedStrip::SendBytes64(char* data) {
     }
 }
 
-void LedStrip::ConvertColor24(char* data) {
-    char newData[24];
+void LedStrip::ConvertColor24(char* output_data, char* input_data) {
+    memset(output_data,0,24);
 
-    memset(newData,0,24);
-
-    newData[0] = 0xFF;
-    newData[8] = 0xFF;
-    newData[16] = 0xFF;
+    output_data[0] = 0xFF;
+    output_data[8] = 0xFF;
+    output_data[16] = 0xFF;
 
 
     for (int bit_index = 7; bit_index > 0; bit_index--) {
         for (int pixel_index = 0; pixel_index < 8; pixel_index++) {
-            newData[1 +7-bit_index] |= ((data[1 + 3*pixel_index] >> bit_index) & 1) << pixel_index;
-            newData[9 +7-bit_index] |= ((data[    3*pixel_index] >> bit_index) & 1) << pixel_index;
-            newData[17+7-bit_index] |= ((data[2 + 3*pixel_index] >> bit_index) & 1) << pixel_index;
+            output_data[1 +7-bit_index] |= ((input_data[1 + 3*pixel_index] >> bit_index) & 1) << pixel_index;
+            output_data[9 +7-bit_index] |= ((input_data[    3*pixel_index] >> bit_index) & 1) << pixel_index;
+            output_data[17+7-bit_index] |= ((input_data[2 + 3*pixel_index] >> bit_index) & 1) << pixel_index;
         }
     }
-
-//    for (int i = 0; i < 7; i++) {
-//       newData[i+1] = 0x00;
-//       newData[i+9] = 0x00;
-//       newData[i+17] = 0x00;
-//    }
-
-    memcpy(data, newData, 24);
 }
 
-void LedStrip::LoadData(char* data) {
-    char output_data[m_image_height*m_image_width*3];
-    memcpy(output_data, data, m_image_height*m_image_width*3);
+void LedStrip::LoadData(char* input_data) {
+    char output_data[m_image_height*8*3];
 
     // Convert the data to the appropriate space
-    for (int index = 1; index < m_image_height*8*3; index+=24) {
-        ConvertColor24(output_data+index);
+    for (int row = 0; row < m_image_height; row++) {
+        // Increment input for these reasons:
+        // 3*m_offset - LED strip offset
+        // 3*m_image_width*row - current row
+        ConvertColor24(output_data+row*24, input_data+3*m_offset+3*m_image_width*row); // TODO: fix this.
     }
 
     // Write out the appropriate amount of data
-    for (int index = 1; index < m_image_height*8*3; index+=64) {
+    for (int index = 0; index < m_image_height*8*3; index+=64) {
         SendBytes64(output_data+index);
     }
 }
