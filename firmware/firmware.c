@@ -37,7 +37,6 @@ void send_str(const char *s);
 uint8_t recv_str(char *buf, uint8_t size);
 void parse_and_execute_command(const char *buf, uint8_t num);
 
-#if 1
 // Serial to parallel SPI driver
 static
 void send_parallel_byte(
