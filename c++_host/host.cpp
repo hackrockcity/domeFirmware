@@ -13,12 +13,16 @@ int main( int argc, const char* argv[] ) {
     // Connect to a LED strip
     std::vector<LedStrip> strips;
 
-    strips.push_back(LedStrip(display_width,display_height,0));
-//    strips.push_back(LedStrip(display_width,display_height,8));
-//    strips.push_back(LedStrip(display_width,display_height,16));
-    strips[0].Connect("/dev/cu.usbmodem12341");
-//    strips[1].Connect("/dev/ttyACM1");
-//    strips[2].Connect("/dev/ttyACM2");
+    // Specify the screen geometry and strips on the command line, like this:
+    // host height width /dev/ttyACM0 0 /dev/ttyACM1 8
+
+    display_height = atoi(argv[1]);
+    display_width = atoi(argv[2]);
+
+    for(int i = 3; i < argc; i+=2) {
+      strips.push_back(LedStrip(display_width,display_height,atoi(argv[i+1])));
+      strips.back().Connect(argv[i]);
+    }
 
     SocketListener listener;
     listener.Connect("0.0.0.0", 58082);
