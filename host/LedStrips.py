@@ -18,7 +18,7 @@ class LedStrips:
 		self.offset = offset
 
 	def connect(self, port):
-		self.ser = serial.Serial(port, 1000002, timeout=0)
+		self.ser = serial.Serial(port, 115200, timeout=0)
 
 	def RgbRowToStrips(self, data):
 		"""

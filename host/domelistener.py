@@ -15,9 +15,9 @@ image_width = 24
 
 # Serial port settings
 strip_names = [
-	['/dev/tty.usbmodem12341', 0],
-	['/dev/tty.usbmodem11',   16],
-	['/dev/tty.usbmodem12',   8],
+	['/dev/ttyACM0', 0],
+	['/dev/ttyACM1', 16],
+	['/dev/ttyACM2', 8],
 ]
 
 class threadedLedStrips(multiprocessing.Process):

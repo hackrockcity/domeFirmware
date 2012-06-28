@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <pthread.h>
 
 #include "LedStrip.h"
 #include "SocketListener.h"
@@ -15,12 +14,11 @@ int main( int argc, const char* argv[] ) {
     std::vector<LedStrip> strips;
 
     strips.push_back(LedStrip(display_width,display_height,0));
-//    strips.push_back(LedStrip(display_width,display_height,0));
-//    strips.push_back(LedStrip(display_width,display_height,0));
-//    strips[0].Connect("/dev/ttyACM0");
-//    strips[1].Connect("/dev/ttyACM1");
-//    strips[0].Connect("/dev/ttyACM2");
+//    strips.push_back(LedStrip(display_width,display_height,8));
+//    strips.push_back(LedStrip(display_width,display_height,16));
     strips[0].Connect("/dev/cu.usbmodem12341");
+//    strips[1].Connect("/dev/ttyACM1");
+//    strips[2].Connect("/dev/ttyACM2");
 
     SocketListener listener;
     listener.Connect("0.0.0.0", 58082);
@@ -33,7 +31,7 @@ int main( int argc, const char* argv[] ) {
         }
 
         for(int i = 0; i < strips.size(); i++) {
-            strips[i].LoadData(data);
+            strips[i].LoadData(data + 1);
         }
     }
 }
