@@ -36,9 +36,9 @@ void LedStrip::SendBytes64(char* data) {
     }
     while (return_code < 0);
 
-    if (count > 0) {
+//    if (count > 0) {
 //        std::cerr << "count=" << count << std::endl;
-    }
+//    }
 }
 
 void LedStrip::ConvertColor24(char* output_data, char* input_data) {
