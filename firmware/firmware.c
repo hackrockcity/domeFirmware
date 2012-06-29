@@ -50,24 +50,6 @@ void send_parallel_byte(
 	PORTD = 0xFF;
 }
 
-static void
-send_color(
-	const uint8_t color
-)
-{
-	uint8_t c = color | 0x80;
-	uint8_t mask = 0x80;
-
-	while (mask)
-	{
-		if (c & mask)
-			send_parallel_byte(0xFF);
-		else
-			send_parallel_byte(0x00);
-		mask >>= 1;
-	}
-}
-
 int main(void)
 {
 	CPU_PRESCALE(0);
