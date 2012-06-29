@@ -22,7 +22,7 @@ void * dataloader(void * arg)
         pthread_mutex_unlock(&load_mutex);
 
         strip->Flip();
-        strip->LoadData(global_data);
+        strip->LoadData(global_data + 1);
     }
 
     return NULL;
@@ -33,7 +33,7 @@ int main( int argc, const char* argv[] ) {
     std::vector<pthread_t*> threads;
 
     // Connect to a LED strip
-    std::vector<LedStrip> strips;
+    std::vector<LedStrip*> strips;
 
     // Specify the screen geometry and strips on the command line, like this:
     // host 160 40 /dev/ttyACM0 0 /dev/ttyACM1 8
@@ -41,23 +41,31 @@ int main( int argc, const char* argv[] ) {
     int display_height = atoi(argv[1]);
     int display_width = atoi(argv[2]);
 
+    std::cout << "Initializing display"
+              << ", width=" << display_width
+              << ", height=" << display_height
+              << std::endl;
+
     // Init a data buffer, let's only make this once. TODO: WTF!
     global_data = new char[display_width*display_height*3+1];
 
     for(int i = 3; i < argc; i+=2) {
-        strips.push_back(LedStrip(
+        std::cout << "Adding output device, port=" << argv[i]
+                  << ", offset=" << atoi(argv[i+1])
+                  << std::endl;
+        strips.push_back(new LedStrip(
             display_width,
             display_height,
             atoi(argv[i+1]))
         );
-        strips.back().Connect(argv[i]);
+        strips.back()->Connect(argv[i]);
 
         threads.push_back(new pthread_t);
         pthread_create(
             threads.back(),
             NULL,
             dataloader,
-            (void *)&(strips.back())
+            (void *)(strips.back())
         );
     }
 
@@ -70,9 +78,9 @@ int main( int argc, const char* argv[] ) {
             display_width*display_height*3+1
         );
         if (status == 0) {
-            pthread_mutex_unlock(&load_mutex);
+//            pthread_mutex_unlock(&load_mutex);
             pthread_cond_broadcast(&load_signal);
-            pthread_mutex_lock(&load_mutex);
+//            pthread_mutex_lock(&load_mutex);
         }
     }
 }

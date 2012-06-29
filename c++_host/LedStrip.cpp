@@ -18,27 +18,20 @@ void LedStrip::Connect(std::string portname)
         perror(portname.c_str());
         exit(1);  // TODO: Should we actually exit here?
     }
-
 }
 
 void LedStrip::SendBytes64(char* data) {
     int return_code;
-    int count = 0;
-
+    // TODO: we should check if our file disappears.
     do {
         return_code = write(m_fd, data, 64);
         // If a write error occurs, it is probably because the buffer is full.
         // Force it to drain, then try again.
         if (return_code < 0) {
             tcdrain(m_fd);
-            count++;
         }
     }
     while (return_code < 0);
-
-//    if (count > 0) {
-//        std::cerr << "count=" << count << std::endl;
-//    }
 }
 
 void LedStrip::ConvertColor24(char* output_data, char* input_data) {
@@ -66,7 +59,10 @@ void LedStrip::LoadData(char* input_data) {
         // Increment input for these reasons:
         // 3*m_offset - LED strip offset
         // 3*m_image_width*row - current row
-        ConvertColor24(output_data+row*24, input_data+3*m_offset+3*m_image_width*row); // TODO: fix this.
+        ConvertColor24(
+            output_data+row*24,
+            input_data+3*m_offset+3*m_image_width*row
+        );
     }
 
     // Write out the appropriate amount of data
